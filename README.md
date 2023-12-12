@@ -57,7 +57,7 @@ src
 |   |   |   |   |   |-- OrderData.java
 |   |   |   |   |   |-- OrderDataGenerator.java
 |   |   |   |   |-- user
-|   |   |   |   |   |-- User
+|   |   |   |   |   |-- User.java
 |   |   |   |   |   |-- UserClient.java
 |   |   |   |   |   |-- UserContactInfo.java
 |   |   |   |   |   |-- UserCredentials.java
@@ -70,19 +70,19 @@ src
 |   |   |-- praktikum
 |   |   |   |-- stellarburgers
 |   |   |   |   |-- ingredient
-|   |   |   |   |   |-- GetIngredientsTest
+|   |   |   |   |   |-- GetIngredientsTest.java
 |   |   |   |   |-- order
-|   |   |   |   |   |-- CreateOrderParametersTest
-|   |   |   |   |   |-- CreateOrderTest
-|   |   |   |   |   |-- GetOrdersTest
+|   |   |   |   |   |-- CreateOrderParametersTest.java
+|   |   |   |   |   |-- CreateOrderTest.java
+|   |   |   |   |   |-- GetOrdersTest.java
 |   |   |   |   |-- user
-|   |   |   |   |   |-- CreateUserParametersTest
-|   |   |   |   |   |-- CreateUserTest
-|   |   |   |   |   |-- LoginUserParametersTest
-|   |   |   |   |   |-- LoginUserTest
-|   |   |   |   |   |-- ModifyUserParametersTest
-|   |   |   |   |   |-- ModifyUserTest
-|   |   |   |   |-- WebUiTestLauncher.java
+|   |   |   |   |   |-- CreateUserParametersTest.java
+|   |   |   |   |   |-- CreateUserTest.java
+|   |   |   |   |   |-- LoginUserParametersTest.java
+|   |   |   |   |   |-- LoginUserTest.java
+|   |   |   |   |   |-- ModifyUserParametersTest.java
+|   |   |   |   |   |-- ModifyUserTest.java
+|   |   |   |   |-- ApiTestLauncher.java
 ```
 
 
