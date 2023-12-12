@@ -50,7 +50,7 @@ public class GetIngredientsTest {
         }
     }
 
-    @Epic(value = "IngredientData Client")
+    @Epic(value = "Ingredient Client")
     @Feature(value = "operations")
     @Story(value = "getIngredients")
     @Test
@@ -66,7 +66,7 @@ public class GetIngredientsTest {
                 .and().body("data.size()", Matchers.greaterThan(0));
     }
 
-    @Epic(value = "IngredientData Client")
+    @Epic(value = "Ingredient Client")
     @Feature(value = "operations")
     @Story(value = "getIngredients")
     @Test

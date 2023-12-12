@@ -66,7 +66,7 @@ public class GetOrdersTest {
         }
     }
 
-    @Epic(value = "CreateOrderOrderData Client")
+    @Epic(value = "Order Client")
     @Feature(value = "operations")
     @Story(value = "getOrders")
     @Test
@@ -106,7 +106,7 @@ public class GetOrdersTest {
         }
     }
 
-    @Epic(value = "CreateOrderOrderData Client")
+    @Epic(value = "Order Client")
     @Feature(value = "operations")
     @Story(value = "getOrders")
     @Test
