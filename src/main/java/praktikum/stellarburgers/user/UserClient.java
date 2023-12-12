@@ -7,8 +7,7 @@ import io.restassured.response.ValidatableResponse;
 import static io.restassured.RestAssured.given;
 
 public class UserClient extends RestClient {
-    private static final String USER_URL = BASE_URL + "auth/";
-    private static final String CREATE_USER_URL = "https://stellarburgers.nomoreparties.site/api/auth/";
+    private static final String USER_AUTH_URL = BASE_URL + "auth/";
 
     @Step("POST createUser UserRegistrationData {userRegistrationData}")
     public ValidatableResponse createUser(UserRegistrationData userRegistrationData) {
@@ -16,7 +15,7 @@ public class UserClient extends RestClient {
                 .spec(getRequestSpecification())
                 .body(userRegistrationData)
                 .when()
-                .post(CREATE_USER_URL + "register/")
+                .post(USER_AUTH_URL + "register/")
                 .then();
     }
 
@@ -26,7 +25,7 @@ public class UserClient extends RestClient {
                 .spec(getRequestSpecification())
                 .body(userCredentials)
                 .when()
-                .post(USER_URL + "login/")
+                .post(USER_AUTH_URL + "login/")
                 .then();
     }
 
@@ -36,7 +35,7 @@ public class UserClient extends RestClient {
                 .spec(getRequestSpecification(accessToken))
                 .body(userRegistrationData)
                 .when()
-                .patch(USER_URL + "user/")
+                .patch(USER_AUTH_URL + "user/")
                 .then();
     }
 
@@ -46,7 +45,7 @@ public class UserClient extends RestClient {
                 .spec(getRequestSpecification())
                 .body(refreshToken)
                 .when()
-                .post(USER_URL + "logout/")
+                .post(USER_AUTH_URL + "logout/")
                 .then();
     }
 
@@ -55,7 +54,7 @@ public class UserClient extends RestClient {
         return given()
                 .spec(getRequestSpecification(accessToken))
                 .when()
-                .delete(USER_URL + "user/")
+                .delete(USER_AUTH_URL + "user/")
                 .then();
     }
 }

@@ -5,7 +5,6 @@ import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 import io.qameta.allure.junit4.DisplayName;
-import io.restassured.RestAssured;
 import io.restassured.response.ValidatableResponse;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.After;
@@ -28,8 +27,6 @@ public class LoginUserTest {
     @Before
     public void setUp() {
         softAssertions = new SoftAssertions();
-
-        RestAssured.baseURI = "https://stellarburgers.nomoreparties.site";
         userClient = new UserClient();
         userRegistrationData = getRandomUserRegistrationData();
         ValidatableResponse response = userClient.createUser(userRegistrationData);
@@ -51,10 +48,13 @@ public class LoginUserTest {
     @Story(value = "loginUser")
     @Test
     @DisplayName("Login under existent 'User'")
-    @Description("Check that 'User' can be authorized")
-    public void loginUnderExistingUser() {
+    @Description("Check that registered 'User' can be authorized")
+    public void loginUnderExistentUser() {
         ValidatableResponse response = userClient.loginUser(getCredentialsFrom(userRegistrationData));
-        userSuccessInfo = response.extract().body().as(UserSuccessInfo.class);
+        userSuccessInfo = response
+                .extract()
+                .body()
+                .as(UserSuccessInfo.class);
 
         final int ACTUAL_STATUS_CODE = response.extract().statusCode();
 
@@ -79,14 +79,13 @@ public class LoginUserTest {
     @Story(value = "loginUser")
     @Test
     @DisplayName("Login with incorrect 'User' data")
-    @Description("Login with incorrect 'Login' and 'Password'")
-    public void loginWithIncorrectLoginAndPassword() {
+    @Description("Check that login with incorrect 'Email' and 'Password' is impossible")
+    public void loginWithIncorrectEmailAndPassword() {
         String WRONG_EMAIL = userRegistrationData.getPassword();
         String WRONG_PASSWORD = userRegistrationData.getPassword().substring(0, 4);
 
         ValidatableResponse response = userClient.loginUser(new UserCredentials(WRONG_EMAIL, WRONG_PASSWORD));
         UserFailureInfo userFailureInfo = response
-                .log().all()
                 .extract()
                 .body()
                 .as(UserFailureInfo.class);

@@ -5,7 +5,6 @@ import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 import io.qameta.allure.junit4.DisplayName;
-import io.restassured.RestAssured;
 import io.restassured.response.ValidatableResponse;
 import org.assertj.core.api.SoftAssertions;
 import org.hamcrest.Matchers;
@@ -30,8 +29,6 @@ public class CreateUserTest {
     @Before
     public void setUp() {
         softAssertions = new SoftAssertions();
-
-        RestAssured.baseURI = "https://stellarburgers.nomoreparties.site";
         userClient = new UserClient();
         userRegistrationData = getRandomUserRegistrationData();
     }
@@ -54,16 +51,12 @@ public class CreateUserTest {
     @Description("Check that 'Unique user' can be created")
     public void createUniqueUser() {
         ValidatableResponse response = userClient.createUser(userRegistrationData);
-        response
-                .assertThat()
-                .statusCode(SC_OK)
-                .and().body("success", Matchers.is(true))
-                .and().body("accessToken", Matchers.notNullValue())
-                .and().body("refreshToken", Matchers.notNullValue())
-                .and().body("user.email", Matchers.notNullValue())
-                .and().body("user.name", Matchers.notNullValue());
+        userSuccessInfo = response
+                .extract()
+                .body()
+                .as(UserSuccessInfo.class);
 
-        userSuccessInfo = response.extract().body().as(UserSuccessInfo.class);
+        final int ACTUAL_STATUS_CODE = response.extract().statusCode();
 
         final String EXPECTED_NAME = userRegistrationData.getName();
         final String EXPECTED_EMAIL = userRegistrationData.getEmail();
@@ -74,6 +67,7 @@ public class CreateUserTest {
         final String ACTUAL_ACCESS_TOKEN = userSuccessInfo.getAccessToken();
         final String ACTUAL_REFRESH_TOKEN = userSuccessInfo.getRefreshToken();
 
+        softAssertions.assertThat( ACTUAL_STATUS_CODE).isEqualTo(SC_OK);
         softAssertions.assertThat(ACTUAL_ACCESS_TOKEN).isNotEmpty();
         softAssertions.assertThat(ACTUAL_REFRESH_TOKEN).isNotEmpty();
         softAssertions.assertThat(ACTUAL_NAME).isEqualTo(EXPECTED_NAME);

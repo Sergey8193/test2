@@ -5,7 +5,6 @@ import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 import io.qameta.allure.junit4.DisplayName;
-import io.restassured.RestAssured;
 import io.restassured.response.ValidatableResponse;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.After;
@@ -13,6 +12,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+
+import java.util.Objects;
 
 import static org.apache.http.HttpStatus.*;
 import static praktikum.stellarburgers.user.UserDataGenerator.*;
@@ -23,7 +24,11 @@ public class LoginUserParametersTest {
     SoftAssertions softAssertions;
 
     private UserClient userClient;
-    UserFailureInfo userFailureInfo;
+    private UserRegistrationData userRegistrationData;
+    private UserSuccessInfo userSuccessInfo;
+
+    private static final String EXISTENT_EMAIL = "existent email";
+    private static final String EXISTENT_PASSWORD = "existent password";
 
     private final String EMAIL;
     private final String PASSWORD;
@@ -40,15 +45,25 @@ public class LoginUserParametersTest {
         this.EXPECTED_MESSAGE = message;
     }
 
-    @Parameterized.Parameters(name = "'Login User' parameters test: ( email: {0}, password: {1} )")
+    @Parameterized.Parameters(name = "loginUser ( email: {0}, password: {1} )")
     public static Object[][] getTestData() {
         return new Object[][]{
+                { EXISTENT_EMAIL, EXISTENT_PASSWORD, SC_OK, true, null },
+                { EXISTENT_EMAIL, getRandomPassword(), SC_UNAUTHORIZED, false, "email or password are incorrect" },
+                { EXISTENT_EMAIL, "", SC_UNAUTHORIZED, false, "email or password are incorrect" },
+                { EXISTENT_EMAIL, null, SC_UNAUTHORIZED, false, "email or password are incorrect" },
+
+                { getRandomEmail(),  EXISTENT_PASSWORD, SC_UNAUTHORIZED, false, "email or password are incorrect" },
                 { getRandomEmail(), getRandomPassword(), SC_UNAUTHORIZED, false, "email or password are incorrect" },
                 { getRandomEmail(), "", SC_UNAUTHORIZED, false, "email or password are incorrect" },
                 { getRandomEmail(), null, SC_UNAUTHORIZED, false, "email or password are incorrect" },
+
+                { "", EXISTENT_PASSWORD, SC_UNAUTHORIZED, false, "email or password are incorrect" },
                 { "", getRandomPassword(), SC_UNAUTHORIZED, false, "email or password are incorrect" },
                 { "", "", SC_UNAUTHORIZED, false, "email or password are incorrect" },
                 { "", null, SC_UNAUTHORIZED, false, "email or password are incorrect" },
+
+                { null, EXISTENT_PASSWORD, SC_UNAUTHORIZED, false, "email or password are incorrect" },
                 { null, getRandomPassword(), SC_UNAUTHORIZED, false, "email or password are incorrect" },
                 { null, "", SC_UNAUTHORIZED, false, "email or password are incorrect" },
                 { null, null, SC_UNAUTHORIZED, false, "email or password are incorrect" },
@@ -58,31 +73,54 @@ public class LoginUserParametersTest {
     @Before
     public void setUp() {
         softAssertions = new SoftAssertions();
-
-        RestAssured.baseURI = "https://stellarburgers.nomoreparties.site";
         userClient = new UserClient();
+        userRegistrationData = getRandomUserRegistrationData();
+        ValidatableResponse response = userClient.createUser(userRegistrationData);
+        userSuccessInfo = response.extract().body().as(UserSuccessInfo.class);
     }
 
     @After
     public void cleanUp() {
+        if (!Objects.equals(userSuccessInfo, null)) {
+            if (!Objects.equals(userSuccessInfo.getAccessToken(), null) &&
+                    (!userSuccessInfo.getAccessToken().isEmpty())) {
+                userClient.deleteUser(userSuccessInfo.getAccessToken());
+            }
+        }
     }
 
     @Epic(value = "User Client")
     @Feature(value = "operations")
     @Story(value = "loginUser")
     @Test
-    @DisplayName("Login with incorrect user data")
-    @Description("Login with incorrect 'Login' and 'Password'")
-    public void loginWithIncorrectLoginAndPassword() {
-        ValidatableResponse response = userClient.loginUser(new UserCredentials(EMAIL, PASSWORD));
-        userFailureInfo = response
-                .extract()
-                .body()
-                .as(UserFailureInfo.class);
+    @DisplayName("Login User parameters validation")
+    @Description("Check that login is possible with existent 'Login' and 'Password' only")
+    public void loginUserParametersValidation() {
+        String email = Objects.equals(EMAIL, EXISTENT_EMAIL) ? userRegistrationData.getEmail() : EMAIL;
+        String password = Objects.equals(PASSWORD, EXISTENT_PASSWORD) ? userRegistrationData.getPassword() : PASSWORD;
 
+        ValidatableResponse response = userClient.loginUser(new UserCredentials(email, password));
         final int ACTUAL_STATUS_CODE = response.extract().statusCode();
-        final boolean ACTUAL_SUCCESS = userFailureInfo.isSuccess();
-        final String ACTUAL_MESSAGE = userFailureInfo.getMessage();
+        boolean success;
+        String message;
+
+        if (ACTUAL_STATUS_CODE == SC_OK) {
+            UserSuccessInfo userSuccessInfo = response
+                    .extract()
+                    .body()
+                    .as(UserSuccessInfo.class);
+            success = userSuccessInfo.isSuccess();
+            message = null;
+        } else {
+            UserFailureInfo userFailureInfo = response
+                    .extract()
+                    .body()
+                    .as(UserFailureInfo.class);
+            success = userFailureInfo.isSuccess();
+            message = userFailureInfo.getMessage();
+        }
+        final boolean ACTUAL_SUCCESS = success;
+        final String ACTUAL_MESSAGE = message;
 
         softAssertions.assertThat(ACTUAL_STATUS_CODE).isEqualTo(EXPECTED_STATUS_CODE);
         softAssertions.assertThat(ACTUAL_SUCCESS).isEqualTo(EXPECTED_SUCCESS);

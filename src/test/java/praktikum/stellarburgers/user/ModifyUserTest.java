@@ -30,12 +30,12 @@ public class ModifyUserTest {
     @Before
     public void setUp() {
         softAssertions = new SoftAssertions();
-
         userClient = new UserClient();
         userRegistrationData = getRandomUserRegistrationData();
 
         userClient.createUser(userRegistrationData);
-        userSuccessInfo = userClient.loginUser(getCredentialsFrom(userRegistrationData))
+        userSuccessInfo = userClient
+                .loginUser(getCredentialsFrom(userRegistrationData))
                 .extract()
                 .body()
                 .as(UserSuccessInfo.class);
@@ -106,7 +106,6 @@ public class ModifyUserTest {
                 .body()
                 .as(UserSuccessInfo.class);
         String someonesAccessToken = someonesInfo.getAccessToken();
-        String someonesRefreshToken = someonesInfo.getRefreshToken();
 
         UserRegistrationData newRegistrationData = getRandomUserRegistrationData();
         newRegistrationData.setEmail(someonesInfo.getUser().getEmail());
@@ -139,7 +138,6 @@ public class ModifyUserTest {
         softAssertions.assertThat(ACTUAL_MESSAGE).isEqualTo(EXPECTED_MESSAGE);
         softAssertions.assertAll();
 
-        userClient.logoutUser(someonesRefreshToken);
         userClient.deleteUser(someonesAccessToken);
     }
 
@@ -152,7 +150,6 @@ public class ModifyUserTest {
     public void modifyUserWithoutAuthorization() {
         UserRegistrationData newRegistrationData = getRandomUserRegistrationData();
         newRegistrationData.setEmail(userRegistrationData.getEmail());
-
         ValidatableResponse response = userClient.modifyUser(userRegistrationData, null);
         final int ACTUAL_STATUS_CODE = response.extract().statusCode();
         boolean success;

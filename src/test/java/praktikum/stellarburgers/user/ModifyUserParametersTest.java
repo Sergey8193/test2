@@ -81,13 +81,13 @@ public class ModifyUserParametersTest {
     @Before
     public void setUp() {
         softAssertions = new SoftAssertions();
-
         userClient = new UserClient();
         userRegistrationData = getRandomUserRegistrationData();
 
         if (Objects.equals(USER_STATUS, AUTHORIZED_USER)) {
             userClient.createUser(userRegistrationData);
-            userSuccessInfo = userClient.loginUser(getCredentialsFrom(userRegistrationData))
+            userSuccessInfo = userClient
+                    .loginUser(getCredentialsFrom(userRegistrationData))
                     .extract()
                     .body()
                     .as(UserSuccessInfo.class);

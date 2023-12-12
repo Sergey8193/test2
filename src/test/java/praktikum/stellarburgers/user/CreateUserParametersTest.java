@@ -5,7 +5,6 @@ import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 import io.qameta.allure.junit4.DisplayName;
-import io.restassured.RestAssured;
 import io.restassured.response.ValidatableResponse;
 import org.assertj.core.api.SoftAssertions;
 import org.hamcrest.Matchers;
@@ -46,7 +45,7 @@ public class CreateUserParametersTest {
         this.MESSAGE =message;
     }
 
-    @Parameterized.Parameters(name = "'Create User' parameters test: ( name: {0}, email: {1}, password: {2} )")
+    @Parameterized.Parameters(name = "createUser ( name: {0}, email: {1}, password: {2} )")
     public static Object[][] getTestData() {
         return new Object[][]{
                 { getRandomName(), getRandomEmail(), getRandomPassword(), SC_OK, true, null },
@@ -84,8 +83,6 @@ public class CreateUserParametersTest {
     @Before
     public void setUp() {
         softAssertions = new SoftAssertions();
-
-        RestAssured.baseURI = "https://stellarburgers.nomoreparties.site";
         userClient = new UserClient();
         userRegistrationData = new UserRegistrationData(EMAIL, PASSWORD, NAME);
     }
