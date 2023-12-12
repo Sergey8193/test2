@@ -40,7 +40,6 @@ src
 |   |   |   |-- stellarburgers
 |   |   |   |   |-- constants
 |   |   |   |   |   |-- RestClient.java
-|   |   |   |   |   |-- UserState.java
 |   |   |   |   |   |-- UserStatus.java
 |   |   |   |   |-- ingredient
 |   |   |   |   |   |-- IngredientClient.java
