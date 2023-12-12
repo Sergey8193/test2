@@ -62,29 +62,12 @@ public class ModifyUserTest {
     @Description("Check that User data can be modified")
     public void modifyLoggedInUserDataWithCorrectNewData() {
         UserRegistrationData newRegistrationData = getRandomUserRegistrationData();
-
         ValidatableResponse response = userClient.modifyUser(newRegistrationData, accessToken);
-        final int ACTUAL_STATUS_CODE = response.extract().statusCode();
-        boolean success;
-        String message;
+        UserResponseBase userResponseBase = new UserResponseBase(response);
 
-        if (ACTUAL_STATUS_CODE == SC_OK) {
-            UserSuccessInfo userSuccessInfo = response
-                    .extract()
-                    .body()
-                    .as(UserSuccessInfo.class);
-            success = userSuccessInfo.isSuccess();
-            message = null;
-        } else {
-            UserFailureInfo userFailureInfo = response
-                    .extract()
-                    .body()
-                    .as(UserFailureInfo.class);
-            success = userFailureInfo.isSuccess();
-            message = userFailureInfo.getMessage();
-        }
-        final boolean ACTUAL_SUCCESS = success;
-        final String ACTUAL_MESSAGE = message;
+        final int ACTUAL_STATUS_CODE = userResponseBase.getCode();
+        final boolean ACTUAL_SUCCESS = userResponseBase.getSuccess();
+        final String ACTUAL_MESSAGE = userResponseBase.getMessage();
 
         softAssertions.assertThat(ACTUAL_STATUS_CODE).isEqualTo(SC_OK);
         softAssertions.assertThat(ACTUAL_SUCCESS).isEqualTo(true);
@@ -109,36 +92,22 @@ public class ModifyUserTest {
 
         UserRegistrationData newRegistrationData = getRandomUserRegistrationData();
         newRegistrationData.setEmail(someonesInfo.getUser().getEmail());
-        ValidatableResponse response = userClient.modifyUser(newRegistrationData, accessToken);
-        final int ACTUAL_STATUS_CODE = response.extract().statusCode();
-        boolean success;
-        String message;
 
-        if (ACTUAL_STATUS_CODE == SC_OK) {
-            UserSuccessInfo userSuccessInfo = response
-                    .extract()
-                    .body()
-                    .as(UserSuccessInfo.class);
-            success = userSuccessInfo.isSuccess();
-            message = null;
-        } else {
-            UserFailureInfo userFailureInfo = response
-                    .extract()
-                    .body()
-                    .as(UserFailureInfo.class);
-            success = userFailureInfo.isSuccess();
-            message = userFailureInfo.getMessage();
-        }
-        final boolean ACTUAL_SUCCESS = success;
-        final String ACTUAL_MESSAGE = message;
+        ValidatableResponse response = userClient.modifyUser(newRegistrationData, accessToken);
+        UserResponseBase userResponseBase = new UserResponseBase(response);
+
+        userClient.deleteUser(someonesAccessToken);
+
+        final int ACTUAL_STATUS_CODE = userResponseBase.getCode();
+        final boolean ACTUAL_SUCCESS = userResponseBase.getSuccess();
+        final String ACTUAL_MESSAGE = userResponseBase.getMessage();
+
         final String EXPECTED_MESSAGE = "User with such email already exists";
 
         softAssertions.assertThat(ACTUAL_STATUS_CODE).isEqualTo(SC_FORBIDDEN);
         softAssertions.assertThat(ACTUAL_SUCCESS).isEqualTo(false);
         softAssertions.assertThat(ACTUAL_MESSAGE).isEqualTo(EXPECTED_MESSAGE);
         softAssertions.assertAll();
-
-        userClient.deleteUser(someonesAccessToken);
     }
 
     @Epic(value = "User Client")
@@ -150,28 +119,14 @@ public class ModifyUserTest {
     public void modifyUserWithoutAuthorization() {
         UserRegistrationData newRegistrationData = getRandomUserRegistrationData();
         newRegistrationData.setEmail(userRegistrationData.getEmail());
-        ValidatableResponse response = userClient.modifyUser(userRegistrationData, null);
-        final int ACTUAL_STATUS_CODE = response.extract().statusCode();
-        boolean success;
-        String message;
 
-        if (ACTUAL_STATUS_CODE == SC_OK) {
-            UserSuccessInfo userSuccessInfo = response
-                    .extract()
-                    .body()
-                    .as(UserSuccessInfo.class);
-            success = userSuccessInfo.isSuccess();
-            message = null;
-        } else {
-            UserFailureInfo userFailureInfo = response
-                    .extract()
-                    .body()
-                    .as(UserFailureInfo.class);
-            success = userFailureInfo.isSuccess();
-            message = userFailureInfo.getMessage();
-        }
-        final boolean ACTUAL_SUCCESS = success;
-        final String ACTUAL_MESSAGE = message;
+        ValidatableResponse response = userClient.modifyUser(newRegistrationData, null);
+        UserResponseBase userResponseBase = new UserResponseBase(response);
+
+        final int ACTUAL_STATUS_CODE = userResponseBase.getCode();
+        final boolean ACTUAL_SUCCESS = userResponseBase.getSuccess();
+        final String ACTUAL_MESSAGE = userResponseBase.getMessage();
+
         final String EXPECTED_MESSAGE = "You should be authorised";
 
         softAssertions.assertThat(ACTUAL_STATUS_CODE).isEqualTo(SC_UNAUTHORIZED);

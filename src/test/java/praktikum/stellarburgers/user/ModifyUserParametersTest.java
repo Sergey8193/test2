@@ -31,7 +31,6 @@ public class ModifyUserParametersTest {
 
     private UserClient userClient;
     private UserRegistrationData userRegistrationData;
-    private UserSuccessInfo userSuccessInfo;
 
     private String refreshToken;
     private String accessToken;
@@ -86,24 +85,20 @@ public class ModifyUserParametersTest {
 
         if (Objects.equals(USER_STATUS, AUTHORIZED_USER)) {
             userClient.createUser(userRegistrationData);
-            userSuccessInfo = userClient
-                    .loginUser(getCredentialsFrom(userRegistrationData))
-                    .extract()
-                    .body()
-                    .as(UserSuccessInfo.class);
-            accessToken = userSuccessInfo.getAccessToken();
-            refreshToken = userSuccessInfo.getRefreshToken();
+
+            ValidatableResponse response = userClient
+                    .loginUser(getCredentialsFrom(userRegistrationData));
+            UserResponseBase userResponseBase = new UserResponseBase(response);
+            accessToken = userResponseBase.getAccessToken();
+            refreshToken = userResponseBase.getRefreshToken();
         }
     }
 
     @After
     public void cleanUp() {
-        if (!Objects.equals(userSuccessInfo, null)) {
-            if (!Objects.equals(userSuccessInfo.getAccessToken(), null) &&
-                    (!userSuccessInfo.getAccessToken().isEmpty())) {
-                userClient.logoutUser(refreshToken);
-                userClient.deleteUser(accessToken);
-            }
+        if (!Objects.equals(accessToken, null)) {
+            userClient.logoutUser(refreshToken);
+            userClient.deleteUser(accessToken);
         }
     }
 
@@ -120,29 +115,15 @@ public class ModifyUserParametersTest {
         if (!Objects.equals(NAME, THE_SAME_NAME)) userRegistrationData.setName(NAME);
 
         ValidatableResponse response = userClient.modifyUser(userRegistrationData, accessToken);
-        int actualStatusCode = response.extract().statusCode();
-        boolean actualSuccess;
-        String actualMessage;
+        UserResponseBase userResponseBase = new UserResponseBase(response);
 
-        if (actualStatusCode == SC_OK) {
-            UserSuccessInfo userSuccessInfo = response
-                    .extract()
-                    .body()
-                    .as(UserSuccessInfo.class);
-            actualSuccess = userSuccessInfo.isSuccess();
-            actualMessage = null;
-        } else {
-            UserFailureInfo userFailureInfo = response
-                    .extract()
-                    .body()
-                    .as(UserFailureInfo.class);
-            actualSuccess = userFailureInfo.isSuccess();
-            actualMessage = userFailureInfo.getMessage();
-        }
+        final int ACTUAL_STATUS_CODE = userResponseBase.getCode();
+        final boolean ACTUAL_SUCCESS = userResponseBase.getSuccess();
+        final String ACTUAL_MESSAGE = userResponseBase.getMessage();
 
-        softAssertions.assertThat(actualStatusCode).isEqualTo(EXPECTED_STATUS_CODE);
-        softAssertions.assertThat(actualSuccess).isEqualTo(EXPECTED_SUCCESS);
-        softAssertions.assertThat(actualMessage).isEqualTo(EXPECTED_MESSAGE);
+        softAssertions.assertThat(ACTUAL_STATUS_CODE).isEqualTo(EXPECTED_STATUS_CODE);
+        softAssertions.assertThat(ACTUAL_SUCCESS).isEqualTo(EXPECTED_SUCCESS);
+        softAssertions.assertThat(ACTUAL_MESSAGE).isEqualTo(EXPECTED_MESSAGE);
         softAssertions.assertAll();
     }
 }
