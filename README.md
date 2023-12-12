@@ -1,4 +1,4 @@
-# 'Stellar Burgers' web-ui-tests
+# 'Stellar Burgers' API-tests
 
 API TESTING A TRAINING SERVICE
 [**«STELLAR BURGERS»**](https://stellarburgers.nomoreparties.site)
