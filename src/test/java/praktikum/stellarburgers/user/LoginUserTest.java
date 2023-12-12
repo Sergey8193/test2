@@ -22,24 +22,19 @@ public class LoginUserTest {
 
     private UserClient userClient;
     private UserRegistrationData userRegistrationData;
-    private UserSuccessInfo userSuccessInfo;
+    private String accessToken;
 
     @Before
     public void setUp() {
         softAssertions = new SoftAssertions();
         userClient = new UserClient();
         userRegistrationData = getRandomUserRegistrationData();
-        ValidatableResponse response = userClient.createUser(userRegistrationData);
-        userSuccessInfo = response.extract().body().as(UserSuccessInfo.class);
     }
 
     @After
     public void cleanUp() {
-        if (!Objects.equals(userSuccessInfo, null)) {
-            if (!Objects.equals(userSuccessInfo.getAccessToken(), null) &&
-                    (!userSuccessInfo.getAccessToken().isEmpty())) {
-                userClient.deleteUser(userSuccessInfo.getAccessToken());
-            }
+        if (!Objects.equals(accessToken, null)) {
+            userClient.deleteUser(accessToken);
         }
     }
 
@@ -50,28 +45,39 @@ public class LoginUserTest {
     @DisplayName("Login under existent 'User'")
     @Description("Check that registered 'User' can be authorized")
     public void loginUnderExistentUser() {
+        ValidatableResponse createUserResponse = userClient.createUser(userRegistrationData);
+        UserResponseBase createUserResponseBase = new UserResponseBase(createUserResponse);
+        accessToken = createUserResponseBase.getAccessToken();
+
         ValidatableResponse response = userClient.loginUser(getCredentialsFrom(userRegistrationData));
-        userSuccessInfo = response
-                .extract()
-                .body()
-                .as(UserSuccessInfo.class);
+        UserResponseBase userResponseBase = new UserResponseBase(response);
 
-        final int ACTUAL_STATUS_CODE = response.extract().statusCode();
+        final int ACTUAL_STATUS_CODE = userResponseBase.getCode();
+        final boolean ACTUAL_SUCCESS = userResponseBase.getSuccess();
+        final String ACTUAL_MESSAGE = userResponseBase.getMessage();
+        final String ACTUAL_NAME = userResponseBase.getName();
+        final String ACTUAL_EMAIL = userResponseBase.getEmail();
+        final String ACTUAL_ACCESS_TOKEN = userResponseBase.getAccessToken();
+        final String ACTUAL_REFRESH_TOKEN = userResponseBase.getRefreshToken();
 
-        final String ACTUAL_NAME = userSuccessInfo.getUser().getName();
-        final String ACTUAL_EMAIL = userSuccessInfo.getUser().getEmail();
-        final String ACTUAL_ACCESS_TOKEN = userSuccessInfo.getAccessToken();
-        final String ACTUAL_REFRESH_TOKEN = userSuccessInfo.getRefreshToken();
-
+        final boolean EXPECTED_SUCCESS = true;
         final String EXPECTED_NAME = userRegistrationData.getName();
         final String EXPECTED_EMAIL = userRegistrationData.getEmail();
 
         softAssertions.assertThat(ACTUAL_STATUS_CODE).isEqualTo(SC_OK);
-        softAssertions.assertThat(ACTUAL_ACCESS_TOKEN).isNotEmpty();
-        softAssertions.assertThat(ACTUAL_REFRESH_TOKEN).isNotEmpty();
-        softAssertions.assertThat(ACTUAL_NAME).isEqualTo(EXPECTED_NAME);
-        softAssertions.assertThat(ACTUAL_EMAIL).isEqualTo(EXPECTED_EMAIL);
+        softAssertions.assertThat(ACTUAL_SUCCESS).isEqualTo(EXPECTED_SUCCESS);
+        softAssertions.assertThat(ACTUAL_MESSAGE).isEqualTo(null);
         softAssertions.assertAll();
+
+        if (Objects.equals(ACTUAL_STATUS_CODE, SC_OK)) {
+            accessToken = userResponseBase.getAccessToken();
+
+            softAssertions.assertThat(ACTUAL_ACCESS_TOKEN).isNotEmpty();
+            softAssertions.assertThat(ACTUAL_REFRESH_TOKEN).isNotEmpty();
+            softAssertions.assertThat(ACTUAL_NAME).isEqualTo(EXPECTED_NAME);
+            softAssertions.assertThat(ACTUAL_EMAIL).isEqualTo(EXPECTED_EMAIL);
+            softAssertions.assertAll();
+        }
     }
 
     @Epic(value = "User Client")
@@ -85,17 +91,16 @@ public class LoginUserTest {
         String WRONG_PASSWORD = userRegistrationData.getPassword().substring(0, 4);
 
         ValidatableResponse response = userClient.loginUser(new UserCredentials(WRONG_EMAIL, WRONG_PASSWORD));
-        UserFailureInfo userFailureInfo = response
-                .extract()
-                .body()
-                .as(UserFailureInfo.class);
+        UserResponseBase userResponseBase = new UserResponseBase(response);
 
-        final int ACTUAL_STATUS_CODE = response.extract().statusCode();
-        final boolean ACTUAL_SUCCESS = userFailureInfo.isSuccess();
-        final String ACTUAL_MESSAGE = userFailureInfo.getMessage();
+        final int ACTUAL_STATUS_CODE = userResponseBase.getCode();
+        final boolean ACTUAL_SUCCESS = userResponseBase.getSuccess();
+        final String ACTUAL_MESSAGE = userResponseBase.getMessage();
 
         final boolean EXPECTED_SUCCESS = false;
         final String EXPECTED_MESSAGE = "email or password are incorrect";
+
+        if (ACTUAL_STATUS_CODE == SC_OK) { accessToken = userResponseBase.getAccessToken(); }
 
         softAssertions.assertThat(ACTUAL_STATUS_CODE).isEqualTo(SC_UNAUTHORIZED);
         softAssertions.assertThat(ACTUAL_SUCCESS).isEqualTo(EXPECTED_SUCCESS);

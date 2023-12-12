@@ -25,7 +25,7 @@ public class LoginUserParametersTest {
 
     private UserClient userClient;
     private UserRegistrationData userRegistrationData;
-    private UserSuccessInfo userSuccessInfo;
+    private String accessToken;
 
     private static final String EXISTENT_EMAIL = "existent email";
     private static final String EXISTENT_PASSWORD = "existent password";
@@ -75,17 +75,18 @@ public class LoginUserParametersTest {
         softAssertions = new SoftAssertions();
         userClient = new UserClient();
         userRegistrationData = getRandomUserRegistrationData();
-        ValidatableResponse response = userClient.createUser(userRegistrationData);
-        userSuccessInfo = response.extract().body().as(UserSuccessInfo.class);
+
+        if (Objects.equals(EMAIL, EXISTENT_EMAIL) || Objects.equals(PASSWORD, EXISTENT_PASSWORD)) {
+            ValidatableResponse response = userClient.createUser(userRegistrationData);
+            UserResponseBase userResponseBase = new UserResponseBase(response);
+            accessToken = userResponseBase.getAccessToken();
+        }
     }
 
     @After
     public void cleanUp() {
-        if (!Objects.equals(userSuccessInfo, null)) {
-            if (!Objects.equals(userSuccessInfo.getAccessToken(), null) &&
-                    (!userSuccessInfo.getAccessToken().isEmpty())) {
-                userClient.deleteUser(userSuccessInfo.getAccessToken());
-            }
+        if (!Objects.equals(accessToken, null)) {
+            userClient.deleteUser(accessToken);
         }
     }
 
@@ -100,27 +101,18 @@ public class LoginUserParametersTest {
         String password = Objects.equals(PASSWORD, EXISTENT_PASSWORD) ? userRegistrationData.getPassword() : PASSWORD;
 
         ValidatableResponse response = userClient.loginUser(new UserCredentials(email, password));
-        final int ACTUAL_STATUS_CODE = response.extract().statusCode();
-        boolean success;
-        String message;
+        UserResponseBase userResponseBase = new UserResponseBase(response);
+
+        final int ACTUAL_STATUS_CODE = userResponseBase.getCode();
+        final boolean ACTUAL_SUCCESS = userResponseBase.getSuccess();
+        final String ACTUAL_MESSAGE = userResponseBase.getMessage();
 
         if (ACTUAL_STATUS_CODE == SC_OK) {
-            UserSuccessInfo userSuccessInfo = response
-                    .extract()
-                    .body()
-                    .as(UserSuccessInfo.class);
-            success = userSuccessInfo.isSuccess();
-            message = null;
-        } else {
-            UserFailureInfo userFailureInfo = response
-                    .extract()
-                    .body()
-                    .as(UserFailureInfo.class);
-            success = userFailureInfo.isSuccess();
-            message = userFailureInfo.getMessage();
+            String newAccessToken = userResponseBase.getAccessToken();
+            if (!Objects.equals(newAccessToken, null) && !Objects.equals(newAccessToken, accessToken)) {
+                userClient.deleteUser(newAccessToken);
+            }
         }
-        final boolean ACTUAL_SUCCESS = success;
-        final String ACTUAL_MESSAGE = message;
 
         softAssertions.assertThat(ACTUAL_STATUS_CODE).isEqualTo(EXPECTED_STATUS_CODE);
         softAssertions.assertThat(ACTUAL_SUCCESS).isEqualTo(EXPECTED_SUCCESS);
