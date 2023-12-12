@@ -7,7 +7,6 @@ import io.qameta.allure.Story;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.ValidatableResponse;
 import org.assertj.core.api.SoftAssertions;
-import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,7 +23,7 @@ public class CreateUserTest {
 
     private UserClient userClient;
     private UserRegistrationData userRegistrationData;
-    private UserSuccessInfo userSuccessInfo;
+    private String accessToken;
 
     @Before
     public void setUp() {
@@ -35,11 +34,8 @@ public class CreateUserTest {
 
     @After
     public void cleanUp() {
-        if (!Objects.equals(userSuccessInfo, null)) {
-            if (!Objects.equals(userSuccessInfo.getAccessToken(), null) &&
-                    (!userSuccessInfo.getAccessToken().isEmpty())) {
-                userClient.deleteUser(userSuccessInfo.getAccessToken());
-            }
+        if (!Objects.equals(accessToken, null)) {
+            userClient.deleteUser(accessToken);
         }
     }
 
@@ -51,23 +47,23 @@ public class CreateUserTest {
     @Description("Check that 'Unique user' can be created")
     public void createUniqueUser() {
         ValidatableResponse response = userClient.createUser(userRegistrationData);
-        userSuccessInfo = response
-                .extract()
-                .body()
-                .as(UserSuccessInfo.class);
+        UserResponseBase userResponseBase = new UserResponseBase(response);
+        accessToken = userResponseBase.getAccessToken();
 
-        final int ACTUAL_STATUS_CODE = response.extract().statusCode();
+        final int ACTUAL_STATUS_CODE = userResponseBase.getCode();
+        final boolean ACTUAL_SUCCESS = userResponseBase.getSuccess();
+        final String ACTUAL_MESSAGE = userResponseBase.getMessage();
+        final String ACTUAL_NAME = userResponseBase.getName();
+        final String ACTUAL_EMAIL = userResponseBase.getEmail();
+        final String ACTUAL_ACCESS_TOKEN = userResponseBase.getAccessToken();
+        final String ACTUAL_REFRESH_TOKEN = userResponseBase.getRefreshToken();
 
         final String EXPECTED_NAME = userRegistrationData.getName();
         final String EXPECTED_EMAIL = userRegistrationData.getEmail();
 
-        final String ACTUAL_NAME = userSuccessInfo.getUser().getName();
-        final String ACTUAL_EMAIL = userSuccessInfo.getUser().getEmail();
-
-        final String ACTUAL_ACCESS_TOKEN = userSuccessInfo.getAccessToken();
-        final String ACTUAL_REFRESH_TOKEN = userSuccessInfo.getRefreshToken();
-
-        softAssertions.assertThat( ACTUAL_STATUS_CODE).isEqualTo(SC_OK);
+        softAssertions.assertThat(ACTUAL_STATUS_CODE).isEqualTo(SC_OK);
+        softAssertions.assertThat(ACTUAL_SUCCESS).isEqualTo(true);
+        softAssertions.assertThat(ACTUAL_MESSAGE).isEqualTo(null);
         softAssertions.assertThat(ACTUAL_ACCESS_TOKEN).isNotEmpty();
         softAssertions.assertThat(ACTUAL_REFRESH_TOKEN).isNotEmpty();
         softAssertions.assertThat(ACTUAL_NAME).isEqualTo(EXPECTED_NAME);
@@ -82,13 +78,26 @@ public class CreateUserTest {
     @DisplayName(" Create 'User' who is already registered")
     @Description("Check that 'User' with registered email can not be created")
     public void createUserWhoIsAlreadyRegistered() {
-        userClient.createUser(userRegistrationData);
+        ValidatableResponse someonesResponse = userClient.createUser(userRegistrationData);
+        UserResponseBase someonesResponseBase = new UserResponseBase(someonesResponse);
+        accessToken = someonesResponseBase.getAccessToken();
+
         ValidatableResponse response = userClient.createUser(userRegistrationData);
-        response
-                .assertThat()
-                .statusCode(SC_FORBIDDEN)
-                .and().body("success", Matchers.is(false))
-                .and().body("message", Matchers.equalTo("User already exists"));
+        UserResponseBase userResponseBase = new UserResponseBase(response);
+        String userAccessToken = userResponseBase.getAccessToken();
+
+        final int ACTUAL_STATUS_CODE = userResponseBase.getCode();
+        final boolean ACTUAL_SUCCESS = userResponseBase.getSuccess();
+        final String ACTUAL_MESSAGE = userResponseBase.getMessage();
+
+        final String EXPECTED_MESSAGE = "User already exists";
+
+        if (!Objects.equals(userAccessToken, null)) { userClient.deleteUser(userAccessToken);  }
+
+        softAssertions.assertThat(ACTUAL_STATUS_CODE).isEqualTo(SC_FORBIDDEN);
+        softAssertions.assertThat(ACTUAL_SUCCESS).isEqualTo(false);
+        softAssertions.assertThat(ACTUAL_MESSAGE).isEqualTo(EXPECTED_MESSAGE);
+        softAssertions.assertAll();
     }
 
     @Epic(value = "User Client")
@@ -101,11 +110,20 @@ public class CreateUserTest {
         userRegistrationData.setName("");
         userRegistrationData.setEmail("");
         userRegistrationData.setPassword("");
+
         ValidatableResponse response = userClient.createUser(userRegistrationData);
-        response
-                .assertThat()
-                .statusCode(SC_FORBIDDEN)
-                .and().body("success", Matchers.is(false))
-                .and().body("message", Matchers.equalTo("Email, password and name are required fields"));
+        UserResponseBase userResponseBase = new UserResponseBase(response);
+        accessToken = userResponseBase.getAccessToken();
+
+        final int ACTUAL_STATUS_CODE = userResponseBase.getCode();
+        final boolean ACTUAL_SUCCESS = userResponseBase.getSuccess();
+        final String ACTUAL_MESSAGE = userResponseBase.getMessage();
+
+        final String EXPECTED_MESSAGE = "Email, password and name are required fields";
+
+        softAssertions.assertThat(ACTUAL_STATUS_CODE).isEqualTo(SC_FORBIDDEN);
+        softAssertions.assertThat(ACTUAL_SUCCESS).isEqualTo(false);
+        softAssertions.assertThat(ACTUAL_MESSAGE).isEqualTo(EXPECTED_MESSAGE);
+        softAssertions.assertAll();
     }
 }
