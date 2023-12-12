@@ -6,8 +6,10 @@ import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.ValidatableResponse;
+import org.apache.http.util.Asserts;
 import org.hamcrest.Matchers;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import praktikum.stellarburgers.user.UserClient;
@@ -73,36 +75,36 @@ public class GetOrdersTest {
     @Description("Check that logged in user can receive his own order list")
     public void getOrdersForLoggedInUser() {
         ValidatableResponse response = orderClient.getOrders(accessToken);
-        response
-                .assertThat()
-                .statusCode(SC_OK)
-                .and()
-                .body("success", equalTo(true));
-
         int statusCode = response.extract().statusCode();
         boolean success = response.extract().body().path("success");
 
-        GetOrdersSuccessInfo getOrdersSuccessInfo = response.extract().body().as(GetOrdersSuccessInfo.class);
-        List<GetOrdersOrderData> orders = getOrdersSuccessInfo.getOrders();
-        boolean isOrdersNotEmpty = !orders.isEmpty();
-
-        String  expectedId = createOrderSuccessInfo.getOrder().get_id();
-        String actualId = getOrdersSuccessInfo.getOrders().get(0).get_id();
-
-        int  expectedNumber = createOrderSuccessInfo.getOrder().getNumber();
-        int actualNumber = getOrdersSuccessInfo.getOrders().get(0).getNumber();
-
-        String  expectedName = createOrderSuccessInfo.getOrder().getName();
-        String actualName = getOrdersSuccessInfo.getOrders().get(0).getName();
-
         softAssertions.assertThat(statusCode).isEqualTo(SC_OK);
         softAssertions.assertThat(success).isEqualTo(true);
-        softAssertions.assertThat(isOrdersNotEmpty).isEqualTo(true);
-        softAssertions.assertThat(orders.size()).isEqualTo(1);
-        softAssertions.assertThat(actualId).isEqualTo(expectedId);
-        softAssertions.assertThat(actualNumber).isEqualTo(expectedNumber);
-        softAssertions.assertThat(actualName).isEqualTo(expectedName);
         softAssertions.assertAll();
+
+        if (statusCode == SC_OK) {
+            GetOrdersSuccessInfo getOrdersSuccessInfo = response.extract().body().as(GetOrdersSuccessInfo.class);
+            List<GetOrdersOrderData> orders = getOrdersSuccessInfo.getOrders();
+
+            Assert.assertFalse(orders.isEmpty());
+
+            if (!orders.isEmpty()) {
+                String expectedId = createOrderSuccessInfo.getOrder().get_id();
+                String actualId = getOrdersSuccessInfo.getOrders().get(0).get_id();
+
+                int expectedNumber = createOrderSuccessInfo.getOrder().getNumber();
+                int actualNumber = getOrdersSuccessInfo.getOrders().get(0).getNumber();
+
+                String expectedName = createOrderSuccessInfo.getOrder().getName();
+                String actualName = getOrdersSuccessInfo.getOrders().get(0).getName();
+
+                softAssertions.assertThat(orders.size()).isEqualTo(1);
+                softAssertions.assertThat(actualId).isEqualTo(expectedId);
+                softAssertions.assertThat(actualNumber).isEqualTo(expectedNumber);
+                softAssertions.assertThat(actualName).isEqualTo(expectedName);
+                softAssertions.assertAll();
+            }
+        }
     }
 
     @Epic(value = "CreateOrderOrderData Client")
