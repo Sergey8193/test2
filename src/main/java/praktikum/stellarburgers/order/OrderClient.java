@@ -11,7 +11,7 @@ import static io.restassured.RestAssured.given;
 public class OrderClient extends RestClient {
     private static final String ORDER_URL = BASE_URL + "orders/";
 
-    @Step("GET getOrders {accessToken}")
+    @Step("GET getOrders ( accessToken: \"{accessToken}\" )")
     public ValidatableResponse getOrders(String accessToken) {
         return given()
                 .spec(getRequestSpecification(accessToken))
@@ -20,7 +20,7 @@ public class OrderClient extends RestClient {
                 .then();
     }
 
-    @Step("POST createOrder {orderData} ( accessToken=\"{accessToken}\" )")
+    @Step("POST createOrder ( orderData: {orderData}, accessToken: \"{accessToken}\" )")
     public ValidatableResponse createOrder(OrderData data, String accessToken) {
         OrderData orderData = Objects.equals(data, null)
                 ? new OrderData()

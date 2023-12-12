@@ -8,10 +8,9 @@ import static io.restassured.RestAssured.given;
 
 public class IngredientClient extends RestClient {
 
-    @Step("GET getIngredients")
+    @Step("GET getIngredients ( accessToken: \"{accessToken}\" )")
     public ValidatableResponse getIngredients(String accessToken) {
         return given()
-                .log().all()
                 .spec(getRequestSpecification(accessToken))
                 .when()
                 .get("/ingredients")

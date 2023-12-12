@@ -73,7 +73,7 @@ public class GetOrdersTest {
     @Description("Check that logged in user can receive his own order list")
     public void getOrdersForLoggedInUser() {
         ValidatableResponse response = orderClient.getOrders(accessToken);
-        response.log().all()
+        response
                 .assertThat()
                 .statusCode(SC_OK)
                 .and()
@@ -84,7 +84,6 @@ public class GetOrdersTest {
 
         GetOrdersSuccessInfo getOrdersSuccessInfo = response.extract().body().as(GetOrdersSuccessInfo.class);
         List<GetOrdersOrderData> orders = getOrdersSuccessInfo.getOrders();
-        // List<GetOrdersOrderData> orders = response.extract().body().jsonPath().getList("orders", GetOrdersOrderData.class);
         boolean isOrdersNotEmpty = !orders.isEmpty();
 
         String  expectedId = createOrderSuccessInfo.getOrder().get_id();
@@ -104,11 +103,6 @@ public class GetOrdersTest {
         softAssertions.assertThat(actualNumber).isEqualTo(expectedNumber);
         softAssertions.assertThat(actualName).isEqualTo(expectedName);
         softAssertions.assertAll();
-
-        System.out.println(createOrderSuccessInfo);
-        System.out.println(getOrdersSuccessInfo);
-        System.out.println(orders);
-        System.out.println(orders.get(0).getIngredients().get(0));
     }
 
     @Epic(value = "CreateOrderOrderData Client")
@@ -119,7 +113,7 @@ public class GetOrdersTest {
     @Description("Check that anonymous user can not receive some order list")
     public void getOrdersForAnonymousUser() {
         ValidatableResponse response = orderClient.getOrders(NO_ACCESS_TOKEN);
-        response.log().all()
+        response
                 .assertThat()
                 .statusCode(SC_UNAUTHORIZED)
                 .and()

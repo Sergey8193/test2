@@ -9,7 +9,7 @@ import static io.restassured.RestAssured.given;
 public class UserClient extends RestClient {
     private static final String USER_AUTH_URL = BASE_URL + "auth/";
 
-    @Step("POST createUser UserRegistrationData {userRegistrationData}")
+    @Step("POST createUser ( userRegistrationData: {userRegistrationData} )")
     public ValidatableResponse createUser(UserRegistrationData userRegistrationData) {
         return given()
                 .spec(getRequestSpecification())
@@ -19,7 +19,7 @@ public class UserClient extends RestClient {
                 .then();
     }
 
-    @Step("POST loginUser {userData}")
+    @Step("POST loginUser ( userData: {userData} )")
     public ValidatableResponse loginUser(UserCredentials userCredentials) {
         return given()
                 .spec(getRequestSpecification())
@@ -29,7 +29,7 @@ public class UserClient extends RestClient {
                 .then();
     }
 
-    @Step("PATCH modifyUser UserRegistrationData {userRegistrationData} ( userRegistrationData=\"{userRegistrationData}\", accessToken=\"{accessToken}\" )")
+    @Step("PATCH modifyUser ( userRegistrationData: {userRegistrationData}, accessToken: \"{accessToken}\" )")
     public ValidatableResponse modifyUser(UserRegistrationData userRegistrationData, String accessToken) {
         return given()
                 .spec(getRequestSpecification(accessToken))
@@ -39,7 +39,7 @@ public class UserClient extends RestClient {
                 .then();
     }
 
-    @Step("POST logoutUser ( refreshToken=\"{refreshToken}\" )")
+    @Step("POST logoutUser ( refreshToken: \"{refreshToken}\" )")
     public ValidatableResponse logoutUser(String refreshToken) {
         return given()
                 .spec(getRequestSpecification())
@@ -49,7 +49,7 @@ public class UserClient extends RestClient {
                 .then();
     }
 
-    @Step("DELETE deleteUser ( accessToken=\"{accessToken}\" )")
+    @Step("DELETE deleteUser ( accessToken: \"{accessToken}\" )")
     public ValidatableResponse deleteUser(String accessToken) {
         return given()
                 .spec(getRequestSpecification(accessToken))
