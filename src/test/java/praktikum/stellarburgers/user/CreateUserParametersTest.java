@@ -7,7 +7,6 @@ import io.qameta.allure.Story;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.ValidatableResponse;
 import org.assertj.core.api.SoftAssertions;
-import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,23 +25,23 @@ public class CreateUserParametersTest {
 
     private UserClient userClient;
     private UserRegistrationData userRegistrationData;
-    private UserSuccessInfo userSuccessInfo;
+    private String accessToken;
 
     private final String NAME;
     private final String EMAIL;
     private final String PASSWORD;
-    private final int STATUS_CODE;
-    private final boolean SUCCESS;
-    private final String MESSAGE;
+    private final int EXPECTED_STATUS_CODE;
+    private final boolean EXPECTED_SUCCESS;
+    private final String EXPECTED_MESSAGE;
 
     public CreateUserParametersTest(String name, String email, String password,
                                     int statusCode, boolean success, String message) {
         this.NAME = name;
         this.EMAIL = email;
         this.PASSWORD = password;
-        this.STATUS_CODE =statusCode;
-        this.SUCCESS = success;
-        this.MESSAGE =message;
+        this.EXPECTED_STATUS_CODE =statusCode;
+        this.EXPECTED_SUCCESS = success;
+        this.EXPECTED_MESSAGE =message;
     }
 
     @Parameterized.Parameters(name = "createUser ( name: {0}, email: {1}, password: {2} )")
@@ -89,11 +88,8 @@ public class CreateUserParametersTest {
 
     @After
     public void cleanUp() {
-        if (!Objects.equals(userSuccessInfo, null)) {
-            if (!Objects.equals(userSuccessInfo.getAccessToken(), null) &&
-                    (!userSuccessInfo.getAccessToken().isEmpty())) {
-                userClient.deleteUser(userSuccessInfo.getAccessToken());
-            }
+        if (!Objects.equals(accessToken, null)) {
+            userClient.deleteUser(accessToken);
         }
     }
 
@@ -105,29 +101,27 @@ public class CreateUserParametersTest {
     @Description("Check that 'User' can be created only with all required parameters")
     public void createUser() {
         ValidatableResponse response = userClient.createUser(userRegistrationData);
-        response
-                .assertThat()
-                .statusCode(STATUS_CODE)
-                .and().body("success", Matchers.is(SUCCESS))
-                .and().body("message", Matchers.equalTo(MESSAGE));
+        UserResponseBase userResponseBase = new UserResponseBase(response);
+        accessToken = userResponseBase.getAccessToken();
 
-        final boolean ACTUAL_SUCCESS = response.extract().body().jsonPath().getBoolean("success");
-        if (ACTUAL_SUCCESS) {
-            userSuccessInfo = response.extract().body().as(UserSuccessInfo.class);
+        final int ACTUAL_STATUS_CODE = userResponseBase.getCode();
+        final boolean ACTUAL_SUCCESS = userResponseBase.getSuccess();
+        final String ACTUAL_MESSAGE = userResponseBase.getMessage();
+        final String ACTUAL_NAME = userResponseBase.getName();
+        final String ACTUAL_EMAIL = userResponseBase.getEmail();
+        final String ACTUAL_ACCESS_TOKEN = userResponseBase.getAccessToken();
+        final String ACTUAL_REFRESH_TOKEN = userResponseBase.getRefreshToken();
 
-            final String EXPECTED_NAME = userRegistrationData.getName();
-            final String EXPECTED_EMAIL = userRegistrationData.getEmail();
+        softAssertions.assertThat(ACTUAL_STATUS_CODE).isEqualTo(EXPECTED_STATUS_CODE);
+        softAssertions.assertThat(ACTUAL_SUCCESS).isEqualTo(EXPECTED_SUCCESS);
+        softAssertions.assertThat(ACTUAL_MESSAGE).isEqualTo(EXPECTED_MESSAGE);
+        softAssertions.assertAll();
 
-            final String ACTUAL_NAME = userSuccessInfo.getUser().getName();
-            final String ACTUAL_EMAIL = userSuccessInfo.getUser().getEmail();
-
-            final String ACTUAL_ACCESS_TOKEN = userSuccessInfo.getAccessToken();
-            final String ACTUAL_REFRESH_TOKEN = userSuccessInfo.getRefreshToken();
-
+        if (Objects.equals(ACTUAL_STATUS_CODE, SC_OK)) {
             softAssertions.assertThat(ACTUAL_ACCESS_TOKEN).isNotEmpty();
             softAssertions.assertThat(ACTUAL_REFRESH_TOKEN).isNotEmpty();
-            softAssertions.assertThat(ACTUAL_NAME).isEqualTo(EXPECTED_NAME);
-            softAssertions.assertThat(ACTUAL_EMAIL).isEqualTo(EXPECTED_EMAIL);
+            softAssertions.assertThat(ACTUAL_NAME).isEqualTo(NAME);
+            softAssertions.assertThat(ACTUAL_EMAIL).isEqualTo(EMAIL);
             softAssertions.assertAll();
         }
     }

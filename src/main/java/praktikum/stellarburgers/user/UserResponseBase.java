@@ -3,8 +3,6 @@ package praktikum.stellarburgers.user;
 import io.restassured.response.ValidatableResponse;
 import lombok.Getter;
 import lombok.Setter;
-import praktikum.stellarburgers.user.UserFailureInfo;
-import praktikum.stellarburgers.user.UserSuccessInfo;
 
 import static org.apache.http.HttpStatus.SC_OK;
 

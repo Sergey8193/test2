@@ -64,6 +64,7 @@ src
 |   |   |   |   |   |-- UserDataGenerator.java
 |   |   |   |   |   |-- UserFailureInfo.java
 |   |   |   |   |   |-- UserRegistrationData.java
+|   |   |   |   |   |-- UserResponseBase.java
 |   |   |   |   |   |-- UserSuccessInfo.java
 |-- test
 |   |-- java
