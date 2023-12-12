@@ -1,5 +1,10 @@
 package praktikum.stellarburgers.order;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class CreateOrderSuccessInfo {
     private String name;
     private CreateOrderOrderData order;
@@ -12,15 +17,6 @@ public class CreateOrderSuccessInfo {
     }
 
     public CreateOrderSuccessInfo() { }
-
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-
-    public CreateOrderOrderData getOrder() { return order; }
-    public void setOrder(CreateOrderOrderData createOrderOrderData) { this.order = createOrderOrderData; }
-
-    public boolean isSuccess() { return success; }
-    public void setSuccess(boolean success) { this.success = success; }
 
     @Override
     public String toString() {

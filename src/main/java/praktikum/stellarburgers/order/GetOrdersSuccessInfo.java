@@ -1,7 +1,11 @@
 package praktikum.stellarburgers.order;
 
 import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class GetOrdersSuccessInfo {
     private boolean success;
     private List<GetOrdersOrderData> orders;
@@ -17,38 +21,6 @@ public class GetOrdersSuccessInfo {
     }
 
     public GetOrdersSuccessInfo() { }
-
-    public boolean isSuccess() {
-        return success;
-    }
-
-    public void setSuccess(boolean success) {
-        this.success = success;
-    }
-
-    public List<GetOrdersOrderData> getOrders() {
-        return orders;
-    }
-
-    public void setOrders(List<GetOrdersOrderData> orders) {
-        this.orders = orders;
-    }
-
-    public Integer getTotal() {
-        return total;
-    }
-
-    public void setTotal(Integer total) {
-        this.total = total;
-    }
-
-    public Integer getTotalToday() {
-        return totalToday;
-    }
-
-    public void setTotalToday(Integer totalToday) {
-        this.totalToday = totalToday;
-    }
 
     @Override
     public String toString() {

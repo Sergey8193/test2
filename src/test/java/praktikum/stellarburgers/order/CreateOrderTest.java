@@ -69,7 +69,7 @@ public class CreateOrderTest {
         orderData = getRandomOrderData(FROM_REAL_DATA);
         accessToken = userSuccessInfo.getAccessToken();
         ValidatableResponse response = orderClient.createOrder(orderData, accessToken);
-        response.log().all()
+        response
                 .assertThat()
                 .statusCode(200)
                 .and()
@@ -94,7 +94,7 @@ public class CreateOrderTest {
     public void createOrderForAnonymousUser() {
         orderData = getRandomOrderData(FROM_REAL_DATA);
         ValidatableResponse response = orderClient.createOrder(orderData, null);
-        response.log().all()
+        response
                 .assertThat()
                 .statusCode(200)
                 .and()

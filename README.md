@@ -65,7 +65,6 @@ src
 |   |   |   |   |   |-- UserFailureInfo.java
 |   |   |   |   |   |-- UserRegistrationData.java
 |   |   |   |   |   |-- UserSuccessInfo.java
-|   |   |   |   |   |-- UserToken.java
 |-- test
 |   |-- java
 |   |   |-- praktikum

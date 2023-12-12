@@ -10,15 +10,12 @@ import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import praktikum.stellarburgers.ingredient.IngredientClient;
-import praktikum.stellarburgers.ingredient.IngredientsSuccessInfo;
 import praktikum.stellarburgers.user.UserSuccessInfo;
 import praktikum.stellarburgers.user.UserClient;
 import praktikum.stellarburgers.user.UserRegistrationData;
 
 import java.util.Objects;
 
-import static praktikum.stellarburgers.ingredient.IngredientsOrderDataGenerator.getRandomIngredientIdListFromExistentData;
 import static org.apache.http.HttpStatus.SC_OK;
 import static praktikum.stellarburgers.user.UserCredentials.getCredentialsFrom;
 import static praktikum.stellarburgers.user.UserDataGenerator.getRandomUserRegistrationData;
@@ -64,7 +61,6 @@ public class GetIngredientsTest {
     public void getIngredientsRequestReturnsSuccessForLoggedInUser() {
         ValidatableResponse response = ingredientClient.getIngredients(userSuccessInfo.getAccessToken());
         response
-                .log().all()
                 .assertThat()
                 .statusCode(SC_OK)
                 .and().body("success", Matchers.is(true))
@@ -84,7 +80,6 @@ public class GetIngredientsTest {
     public void getIngredientsRequestReturnsSuccessForAnonymousUser() {
         ValidatableResponse response = ingredientClient.getIngredients(null);
         response
-                .log().all()
                 .assertThat()
                 .statusCode(SC_OK)
                 .and().body("success", Matchers.is(true))
@@ -93,7 +88,5 @@ public class GetIngredientsTest {
 
         statusCode = response.extract().statusCode();
         ingredients = response.extract().body().as(IngredientsSuccessInfo.class);
-
-        System.out.println(getRandomIngredientIdListFromExistentData());
     }
 }

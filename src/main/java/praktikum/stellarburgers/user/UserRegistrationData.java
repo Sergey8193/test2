@@ -1,5 +1,10 @@
 package praktikum.stellarburgers.user;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class UserRegistrationData extends UserCredentials {
     private String name;
 
@@ -7,17 +12,6 @@ public class UserRegistrationData extends UserCredentials {
         super(email, password);
         this.name = name;
     }
-
-    public String getEmail() { return super.getEmail(); }
-    public void setEmail(String login) { super.setEmail(login); }
-
-    public String getPassword() { return super.getPassword(); }
-    public void setPassword(String password) {
-        super.setPassword(password);
-    }
-
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
 
     @Override
     public String toString() {
