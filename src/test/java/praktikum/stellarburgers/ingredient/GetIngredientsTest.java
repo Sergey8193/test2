@@ -21,9 +21,7 @@ import static praktikum.stellarburgers.user.UserCredentials.getCredentialsFrom;
 import static praktikum.stellarburgers.user.UserDataGenerator.getRandomUserRegistrationData;
 
 public class GetIngredientsTest {
-    int statusCode;
     IngredientClient ingredientClient;
-    IngredientsSuccessInfo ingredients;
     UserClient userClient;
     UserRegistrationData userRegistrationData;
     UserSuccessInfo userSuccessInfo;
@@ -66,9 +64,6 @@ public class GetIngredientsTest {
                 .and().body("success", Matchers.is(true))
                 .and().body("data", Matchers.notNullValue())
                 .and().body("data.size()", Matchers.greaterThan(0));
-
-        statusCode = response.extract().statusCode();
-        ingredients = response.extract().body().as(IngredientsSuccessInfo.class);
     }
 
     @Epic(value = "IngredientData Client")
@@ -85,8 +80,5 @@ public class GetIngredientsTest {
                 .and().body("success", Matchers.is(true))
                 .and().body("data", Matchers.notNullValue())
                 .and().body("data.size()", Matchers.greaterThan(0));
-
-        statusCode = response.extract().statusCode();
-        ingredients = response.extract().body().as(IngredientsSuccessInfo.class);
     }
 }
