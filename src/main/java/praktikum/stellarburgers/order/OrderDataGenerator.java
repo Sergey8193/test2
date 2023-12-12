@@ -1,6 +1,5 @@
 package praktikum.stellarburgers.order;
 
-import com.github.javafaker.Faker;
 import com.github.javafaker.service.FakeValuesService;
 import com.github.javafaker.service.RandomService;
 
@@ -31,9 +30,5 @@ public class OrderDataGenerator {
         String thirdPart = fakeValuesService.regexify("[a-zA-Z1-9_-]{" + THIRD_PART_CONT + "}");
 
         return "Bearer " + firstPart + "." + secondPart + "." + thirdPart;
-    }
-
-    public static String getRandomRefreshToken() {
-        return new  Faker().random().hex(80);
     }
 }
